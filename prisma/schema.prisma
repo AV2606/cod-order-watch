@@ -32,3 +32,31 @@ model Session {
   refreshToken        String?
   refreshTokenExpires DateTime?
 }
+
+// One row per Shopify order, scoped by shop. Written by the orders/create webhook.
+model Order {
+  id             String   @id @default(cuid())
+  shop           String
+  shopifyId      String // orders/create payload id (BigInt serialised as string)
+  name           String // human-facing order name, e.g. "#1001"
+  totalPrice     Decimal // never Float for money
+  currency       String
+  gateways       String // JSON-encoded string[] (SQLite has no scalar lists)
+  isCod          Boolean
+  orderCreatedAt DateTime
+  receivedAt     DateTime @default(now())
+
+  // Idempotency layer 2: a different webhook id for the same order cannot create a second row.
+  @@unique([shop, shopifyId])
+  @@index([shop, orderCreatedAt])
+}
+
+// Idempotency layer 1: every processed delivery is recorded by its X-Shopify-Webhook-Id.
+model WebhookEvent {
+  webhookId   String   @id // X-Shopify-Webhook-Id
+  shop        String
+  topic       String
+  processedAt DateTime @default(now())
+
+  @@index([shop])
+}
