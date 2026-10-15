@@ -3,11 +3,11 @@ time of start: 8:15 AM
 
 | Step | Time |
 | --- | --- |
-| Scaffold, config, dev store | _fill in_ |
-| Data model, COD rule, webhook handler, uninstall cleanup (written with Claude Code, unit tests green at ~09:00) | _fill in_ |
-| Dashboard | _fill in_ |
-| Tests | _fill in_ |
-| README, end-to-end testing on the dev store, demo rehearsal | _fill in_ |
+| Scaffold, config, dev store | 8:45 |
+| Data model, COD rule, webhook handler, uninstall cleanup (written with Claude Code, unit tests green at ~09:00) | 9:00 |
+| Dashboard | 9:00 |
+| Tests | 9:00 |
+| README, end-to-end testing on the dev store, demo rehearsal | 9:20 |
 | **Total** | _fill in_ |
 
 # COD Order Watch
