@@ -9,6 +9,7 @@ time of start: 8:15 AM
 | Tests | 9:00 |
 | README, end-to-end testing on the dev store, demo rehearsal | 9:20 |
 | Removed uneccesary data and started manual checking | 9: 50 |
+| finished manual checking | 10:25 |
 | **Total** | _fill in_ |
 
 # COD Order Watch
@@ -62,6 +63,8 @@ send "AAAA"   # 401, bad signature
 ```shell
 npm test
 ```
+
+**Bonus chosen: unit test for HMAC verification** with a fixed payload, secret and signature.
 
 - `tests/webhook-hmac.test.ts` calls the real `authenticate.webhook` with real `Request`s: valid signature accepted; tampered body, wrong secret, and re-serialised JSON rejected with 401; missing header rejected with 400. The signature is a fixed vector, precomputed once with `crypto.createHmac`.
 - `tests/cod.test.ts` covers the COD rule and the payload validation.
