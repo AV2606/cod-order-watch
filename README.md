@@ -67,7 +67,7 @@ npm test
 
 ### Protected customer data
 
-Order webhooks contain protected customer data. _Fill in after testing: whether deliveries arrived without requesting access, or whether you had to request protected customer data access (basic level) in the Dev Dashboard → API access._
+Order webhooks contain protected customer data, and this did bite: `shopify app dev` first refused to sync the `orders/create` subscription with "This app is not approved to subscribe to webhook topics containing protected customer data". It went away once I selected a distribution method for the app (custom distribution, "by link", not public). Per Shopify's docs, basic protected customer data access (level 1) is always available to custom-distribution apps; only public apps go through the request-and-review flow. There is no separate request card for it in that case, and nothing was submitted for review. The app only reads order id, name, total, currency, gateways and creation date, never name/address/phone/email.
 
 ## The COD rule (`app/lib/cod.server.ts`)
 
