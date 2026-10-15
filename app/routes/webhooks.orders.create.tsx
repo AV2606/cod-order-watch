@@ -20,14 +20,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     return new Response();
   }
 
-  // 3. Idempotency key. The library already rejects requests without the header (400),
-  //    this is a belt-and-braces guard so the DB write below never gets an empty key.
-  if (!webhookId) {
-    console.warn(`[orders/create] missing webhook id for ${shop}, ignoring`);
-    return new Response();
-  }
-
-  // 4. Don't trust the shape. A malformed payload will never become valid on retry,
+  // 3. Don't trust the shape. A malformed payload will never become valid on retry,
   //    so log it and return 200 instead of looping Shopify's retry schedule.
   const mapped = mapOrderPayload(payload);
   if (!mapped.ok) {
@@ -38,7 +31,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   }
   const order = mapped.data;
 
-  // 5. One transaction: record the delivery, then upsert the order.
+  // 4. One transaction: record the delivery, then upsert the order.
   //    Layer 1: WebhookEvent.webhookId is the primary key, so a retried delivery fails here.
   //    Layer 2: @@unique([shop, shopifyId]) + upsert means a *different* webhook id for the
   //    same order still cannot create a second row.

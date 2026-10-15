@@ -5,10 +5,10 @@ import { boundary } from "@shopify/shopify-app-react-router/server";
 import { authenticate } from "../shopify.server";
 import db from "../db.server";
 
+// Display only: the stored value stays a Decimal, Number() is just for formatting.
 function formatMoney(amount: string, currency: string) {
   return new Intl.NumberFormat("en-US", { style: "currency", currency }).format(
-    // Intl accepts decimal strings, so no Number() round-trip is needed.
-    amount as unknown as number,
+    Number(amount),
   );
 }
 

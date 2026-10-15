@@ -26,7 +26,7 @@ shopify app dev             # starts the tunnel, syncs shopify.app.toml, install
 
 1. On the dev store enable **Settings → Payments → Manual payment methods → Cash on Delivery**.
 2. Open the app from the CLI (press `P`) and approve the install and the config sync.
-3. Create an order in the admin (Orders → Create order, payment: Cash on Delivery) or check out on the storefront. It appears on the dashboard within seconds.
+3. Check out on the storefront with **Cash on Delivery**, or create an order in the admin (Orders → Create order → Collect payment → *Payment due later*). It appears on the dashboard within seconds.
 
 ### Triggering a webhook manually
 
@@ -36,18 +36,24 @@ shopify app webhook trigger --topic orders/create --api-version 2027-01 \
   --client-secret <app client secret>
 ```
 
-Run it twice to see `duplicate delivery, skipping` in the server log (note: the CLI generates a new webhook id per trigger, so to see a *true* retry, replay the same request with curl, including the same `X-Shopify-Webhook-Id`). Inspect rows with `npx prisma studio`.
+### Replaying a delivery (duplicate and bad-signature demo)
 
-Bad signature (should return `401`):
+This signs a body with the app's client secret and sends it twice with the **same** `X-Shopify-Webhook-Id`, which is exactly what a Shopify retry looks like. The shop must have the app installed. Inspect rows with `npx prisma studio`.
 
 ```shell
-curl -i -X POST https://<your-tunnel>/webhooks/orders/create \
-  -H "Content-Type: application/json" \
-  -H "X-Shopify-Topic: orders/create" \
-  -H "X-Shopify-Shop-Domain: <shop>.myshopify.com" \
-  -H "X-Shopify-Webhook-Id: test-1" \
-  -H "X-Shopify-Hmac-Sha256: AAAA" \
-  -d '{"id":1}'
+SECRET=<app client secret>
+URL=https://<your-tunnel>/webhooks/orders/create
+BODY='{"id":9001,"name":"#9001","total_price":"25.00","currency":"USD","created_at":"2026-10-01T10:00:00Z","payment_gateway_names":["Cash on Delivery (COD)"],"financial_status":"pending"}'
+SIG=$(printf '%s' "$BODY" | openssl dgst -sha256 -hmac "$SECRET" -binary | base64)
+
+send() { curl -s -o /dev/null -w "%{http_code}\n" -X POST "$URL" \
+  -H "Content-Type: application/json" -H "X-Shopify-Topic: orders/create" \
+  -H "X-Shopify-Shop-Domain: <shop>.myshopify.com" -H "X-Shopify-Api-Version: 2027-01" \
+  -H "X-Shopify-Webhook-Id: demo-1" -H "X-Shopify-Hmac-Sha256: $1" -d "$BODY"; }
+
+send "$SIG"   # 200, order stored
+send "$SIG"   # 200, log: "duplicate delivery, skipping"; still one Order and one WebhookEvent row
+send "AAAA"   # 401, bad signature
 ```
 
 ### Tests
