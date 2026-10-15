@@ -10,7 +10,7 @@ time of start: 8:15 AM
 | README, end-to-end testing on the dev store, demo rehearsal | 9:20 |
 | Removed uneccesary data and started manual checking | 9: 50 |
 | finished manual checking | 10:25 |
-| **Total** | _fill in_ |
+| **Total** | 10:50 |
 
 # COD Order Watch
 
