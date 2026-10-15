@@ -8,6 +8,7 @@ time of start: 8:15 AM
 | Dashboard | 9:00 |
 | Tests | 9:00 |
 | README, end-to-end testing on the dev store, demo rehearsal | 9:20 |
+| Removed uneccesary data and started manual checking | 9: 50 |
 | **Total** | _fill in_ |
 
 # COD Order Watch
@@ -74,11 +75,11 @@ Order webhooks contain protected customer data, and this did bite: `shopify app 
 An order is COD if either:
 
 1. any `payment_gateway_names` entry, lowercased, contains `"cash"` (e.g. "Cash on Delivery (COD)"); or
-2. `financial_status === "pending"` **and** at least one gateway is *manual*: the literal `"manual"`, or any name that is not a known online processor (`shopify_payments`, `paypal`, `stripe`, `klarna`, `bogus`, …).
+2. `financial_status === "pending"` **and** the payment is *manual*: at least one gateway is the literal `"manual"` or any name that is not a known online processor (`shopify_payments`, `paypal`, `stripe`, `klarna`, `bogus`, …), **or** the gateway list is empty (an order created in the admin and left unpaid records no gateway).
 
 Rule 2 exists because merchants can rename their manual payment method ("Pay at the door"), so matching "cash" alone would miss it.
 
-**Known limits:** other manual methods that stay `pending` (bank deposit, money order) are classified as COD; an order with no gateway at all is *not* COD; the processor list is a hand-kept allowlist. Matching is substring-based, because gateway names are free-form.
+**Known limits:** other manual payments that stay `pending` (bank deposit, money order, "payment due later" invoices) are classified as COD; a *paid* order with no gateway is not COD; the processor list is a hand-kept allowlist. Matching is substring-based, because gateway names are free-form.
 
 ## Key decisions
 

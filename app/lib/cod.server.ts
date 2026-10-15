@@ -49,12 +49,14 @@ function isManualGateway(gateway: string): boolean {
  * COD rule (documented in the README):
  *  1. Any gateway name containing "cash" (case-insensitive) is COD,
  *     e.g. "Cash on Delivery (COD)".
- *  2. Otherwise, the order is COD when financial_status is "pending" AND at least one
- *     gateway is manual (the literal "manual", or anything that is not a known online
- *     processor). Merchants can rename their COD method, so rule 1 alone would miss it.
+ *  2. Otherwise, the order is COD when financial_status is "pending" AND the payment is
+ *     manual: at least one gateway is manual (the literal "manual", or anything that is
+ *     not a known online processor), or the gateway list is explicitly empty (orders
+ *     created in the admin and left unpaid record no gateway; no online processor took
+ *     the payment). Merchants can rename their COD method, so rule 1 alone would miss it.
  *
- * Known false positive: other manual methods that also stay "pending" (bank deposit,
- * money order) are classified as COD. An order with no gateway at all is not COD.
+ * Known false positive: other manual payments that also stay "pending" (bank deposit,
+ * money order, "payment due later" invoices) are classified as COD.
  */
 export function isCodOrder({
   payment_gateway_names,
@@ -64,7 +66,13 @@ export function isCodOrder({
 
   if (gateways.some((g) => g.includes("cash"))) return true;
 
-  return financial_status === "pending" && gateways.some(isManualGateway);
+  const noGatewayRecorded =
+    Array.isArray(payment_gateway_names) && payment_gateway_names.length === 0;
+
+  return (
+    financial_status === "pending" &&
+    (noGatewayRecorded || gateways.some(isManualGateway))
+  );
 }
 
 export interface MappedOrder {

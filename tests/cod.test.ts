@@ -71,10 +71,19 @@ describe("isCodOrder", () => {
       isCodOrder({ payment_gateway_names: "cash", financial_status: "pending" }),
     ).toBe(false);
     expect(
-      isCodOrder({ payment_gateway_names: [], financial_status: "pending" }),
-    ).toBe(false);
-    expect(
       isCodOrder({ payment_gateway_names: [null, 5], financial_status: "pending" }),
+    ).toBe(false);
+  });
+
+  it("is COD when pending with an empty gateway list (admin order left unpaid)", () => {
+    expect(
+      isCodOrder({ payment_gateway_names: [], financial_status: "pending" }),
+    ).toBe(true);
+  });
+
+  it("is not COD when paid with an empty gateway list", () => {
+    expect(
+      isCodOrder({ payment_gateway_names: [], financial_status: "paid" }),
     ).toBe(false);
   });
 });
